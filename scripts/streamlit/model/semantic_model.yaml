@@ -1,0 +1,230 @@
+name: product_matching
+tables:
+  - name: APPROVED_MATCHES
+    description: 'Approved Matches Table: This table contains information about approved
+      product matches via entity resolution between Staples and Office Depot. There
+      is a unique ID code, a product title, and the estimated views and purchases
+      for each product on both companies website. Also, each match (aka each row)
+      has a unified title to represent both products, as well as a unified brand and
+      category of product for users to easily filter by to find specific matches.
+      These tables are being used as reference for the performance of identical products
+      across retailers.'
+    base_table:
+      database: VP_PROD_ENTITYRESOLUTIONFROMTEXT_PROD
+      schema: MATCH
+      table: APPROVED_MATCHES
+    dimensions:
+      - name: STAPLES_ID
+        synonyms:
+          - '  '
+        description: Unique identifier for each product at Staples.
+        expr: STAPLES_ID
+        data_type: TEXT
+        sample_values:
+          - '24454424'
+          - '24448137'
+          - '508857'
+      - name: STAPLES_TITLE
+        synonyms:
+          - '  '
+        description: Title of the product from Staples.
+        expr: STAPLES_TITLE
+        data_type: TEXT
+        sample_values:
+          - HP 410X Magenta High Yield Toner Cartridge (CF413X)
+          - Targus® Lap Chill Mat™
+          - Fellowes Helios 60 5219501 Thermal Binding Machine, 600 Sheet Capacity
+      - name: OFFICE_ID
+        synonyms:
+          - '  '
+        description: Unique identifier for each product from Office Depot.
+        expr: OFFICE_ID
+        data_type: TEXT
+        sample_values:
+          - '370700'
+          - '1381303'
+          - '5016144'
+      - name: OFFICE_TITLE
+        synonyms:
+          - '  '
+        description: Title of the product from Office Depot.
+        expr: OFFICE_TITLE
+        data_type: TEXT
+        sample_values:
+          - NETGEAR AC1750 Dual-band WiFi Range Extender, EX6250
+          - "Champion Sports Plastic Segmented Jump Rope, 8', Yellow/White Item #\
+            \ 835787"
+          - 'HON® 510 25"D Vertical 2-Drawer File Cabinet, Metal, Black Item # 883450'
+      - name: UNIFIED_TITLE
+        synonyms:
+          - '  '
+        description: A unified title that describes both the products being matched.
+          This can be used as a description of both products when considering if the
+          match is relevant for a user's question.
+        expr: UNIFIED_TITLE
+        data_type: TEXT
+        sample_values:
+          - Mind Reader Black Stability Wobble Cushion with Inflation Pump
+          - Microsoft 365 Family 15-Month Subscription for 6 Users
+          - Windex Glass Cleaner with Ammonia-D, 32 fl Oz
+      - name: UNIFIED_BRAND
+        synonyms:
+          - '  '
+        description: A unified brand that identifies the brand that both products
+          are from.
+        expr: UNIFIED_BRAND
+        data_type: TEXT
+        sample_values:
+          - Dell
+          - Elmer's
+          - BIC
+      - name: UNIFIED_CATEGORY
+        synonyms:
+          - '  '
+        description: A unified category for both products to give an idea of what
+          sort of product they are, aka electronics, appliances, etc.
+        expr: UNIFIED_CATEGORY
+        data_type: TEXT
+        sample_values:
+          - Adhesives & Fasteners
+          - Appliances
+          - Arts & Crafts
+          - Audio & Video Equipment
+          - Bags, Briefcases & Luggage
+          - Batteries & Power
+          - Beverages & Snacks
+          - Breakroom Supplies
+          - Cleaning Supplies & Chemicals
+          - Computer Accessories & Peripherals
+          - Computers & Tablets
+          - Data Storage
+          - Education Supplies
+          - Electronics & Networking
+          - Facilities Maintenance
+          - Foodservice Supplies
+          - Furniture
+          - Games, Toys & Entertainment
+          - Hand & Power Tools
+          - Healthcare & Safety Supplies
+          - Home Automation & Security
+          - Janitorial Supplies
+          - Kitchen Supplies
+          - Networking & WiFi
+          - Office Decor & Furniture
+          - Office Machines
+          - Office Supplies
+          - Paint Supplies
+          - Paper Products
+          - Party Supplies & Decor
+          - Phones & Accessories
+          - Printer Ink & Toner
+          - Projectors & Office Machines
+          - Retail & Store Supplies
+          - Safety Equipment
+          - Shipping Supplies
+          - Smart Home & Security
+          - Tools & Hardware
+          - Writing Supplies & Instruments
+    measures:
+      - name: STAPLES_EST_VIEWS
+        synonyms:
+          - '  '
+        description: The estimated views the Staples product received on the website
+          (staples.com)
+        expr: STAPLES_EST_VIEWS
+        data_type: FLOAT
+        sample_values:
+          - '832.1221725587372'
+          - '1433.4872579151413'
+          - '646.9484053239555'
+      - name: STAPLES_EST_PURCHASES
+        synonyms:
+          - '  '
+        description: The estimated purchases the Staples product received on the website
+          (staples.com)
+        expr: STAPLES_EST_PURCHASES
+        data_type: FLOAT
+        sample_values:
+          - '339.26834500237254'
+          - '144.049077975253'
+          - '32.6353613608095'
+      - name: OFFICE_DEPOT_EST_VIEWS
+        synonyms:
+          - '  '
+        description: The estimated views the Office Depot product received on the
+          website (officedepot.com)
+        expr: OFFICE_DEPOT_EST_VIEWS
+        data_type: FLOAT
+        sample_values:
+          - '288.2071927354268'
+          - '282.80488395455245'
+          - '516.0532273321907'
+      - name: OFFICE_DEPOT_EST_PURCHASES
+        synonyms:
+          - '  '
+        description: The estimated purchases the Office Depot product received on
+          the website (officedepot.com)
+        expr: OFFICE_DEPOT_EST_PURCHASES
+        data_type: FLOAT
+        sample_values:
+          - '21.391129615898237'
+          - '26.63465264726257'
+          - '0.23262936955780544'
+verified_queries:
+  - name: Find me keyboards being sold at both retailers.
+    question: Find me keyboards being sold at both retailers.
+    sql: "SELECT\n  staples_title,\n  office_title\nFROM __approved_matches\nWHERE\n\
+      \  staples_title LIKE '%keyboard%' OR office_title LIKE '%keyboard%'\n"
+    verified_at: '1733290969'
+    verified_by: vpatel
+  - name: Can you find me Logitech products being sold at both Staples and Office
+      Depot?
+    question: Can you find me Logitech products being sold at both Staples and Office
+      Depot?
+    sql: "SELECT\n  staples_id,\n  staples_title,\n  office_id,\n  office_title,\n\
+      \  unified_title,\n  unified_brand,\n  unified_category\nFROM __approved_matches\n\
+      WHERE\n  unified_brand = 'Logitech'"
+    verified_at: '1733290994'
+    verified_by: vpatel
+  - name: Find me Apple products being sold at both retailers
+    question: Find me Apple products being sold at both retailers
+    sql: "SELECT\n  unified_brand,\n  staples_title,\n  office_title\nFROM __approved_matches\n\
+      WHERE\n  unified_brand like 'Apple'"
+    verified_at: '1733291336'
+    verified_by: vpatel
+  - name: How are the Sony Xperia XA2 Cell Phones selling at Staples vs Office Depot
+      over the entire available time period?
+    question: How are the Sony Xperia XA2 Cell Phones selling at Staples vs Office
+      Depot over the entire available time period?
+    sql: "SELECT\n  'Sony Xperia XA2 Cell Phones' AS product_name,\n  SUM(staples_est_purchases)\
+      \ AS staples_purchases,\n  SUM(office_depot_est_purchases) AS office_depot_purchases\n\
+      FROM __approved_matches\nWHERE\n  unified_brand like 'Sony' and\n  unified_title\
+      \ like '%Xperia%' and\n  unified_title like '%XA2%'/* Generated by Cortex Analyst\
+      \ */"
+    verified_at: '1733291520'
+    verified_by: vpatel
+  - name: What Logitech mouse models are sold in both Staples and Office Depot?
+    question: What Logitech mouse models are sold in both Staples and Office Depot?
+    sql: "SELECT\n  unified_brand,\n  unified_category,\n  staples_id,\n  office_id,\n\
+      \  unified_title\nFROM __approved_matches\nWHERE\n  unified_brand like '%Logitech%'\n\
+      \  AND unified_title LIKE '%Mouse%'"
+    verified_at: '1733291789'
+    verified_by: vpatel
+  - name: Can you show me the 3 products with the highest purchases to views ratio
+      at Staples over the entire available time period?
+    question: Can you show me the 3 products with the highest purchases to views ratio
+      at Staples over the entire available time period?
+    sql: "SELECT\n  staples_id,\n  staples_title,\n  (\n    staples_est_purchases\
+      \ / NULLIF(staples_est_views, 0)\n  ) AS purchases_to_views_ratio\nFROM __approved_matches\n\
+      ORDER BY\n  purchases_to_views_ratio DESC NULLS LAST\nLIMIT 3"
+    verified_at: '1733452094'
+    verified_by: vpatel
+  - name: Find me the top 5 products with the greatest disparity in purchases at Staples
+      vs Office Depot over the entire available time period.
+    question: Find me the top 5 products with the greatest disparity in purchases
+      at Staples vs Office Depot over the entire available time period.
+    sql: "SELECT\n  unified_title,\n  ABS(staples_est_purchases - office_depot_est_purchases)\
+      \ AS purchase_disparity\nFROM __approved_matches\nORDER BY\n  purchase_disparity\
+      \ DESC NULLS LAST\nLIMIT 5"
+    verified_at: '1733452152'
+    verified_by: vpatel
