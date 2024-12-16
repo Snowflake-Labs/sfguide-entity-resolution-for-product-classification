@@ -11,7 +11,6 @@ import _snowflake
 st.set_page_config(layout="wide", initial_sidebar_state="expanded")
 
 session = get_active_session()
-db = session.get_current_database()
 
 ######################################
 ##### UPDATE VARIABLES IF NEEDED #####
@@ -145,7 +144,7 @@ def send_message(session, prompt):
     """Calls the Cortex REST API and returns the response."""
     request_body = {
         "messages": [{"role": "user", "content": [{"type": "text", "text": prompt}]}],
-        "semantic_model_file": f"@{db}.MATCH.MODEL/matches_semantic_model.yml",
+        "semantic_model_file": f"@PRODUCT_MATCHING_DB.MATCH.MODEL/matches_semantic_model.yml",
     }
     resp = _snowflake.send_snow_api_request(
         "POST",  # method
