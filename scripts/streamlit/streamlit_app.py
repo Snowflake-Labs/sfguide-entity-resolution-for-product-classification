@@ -145,7 +145,7 @@ def send_message(session, prompt):
     """Calls the Cortex REST API and returns the response."""
     request_body = {
         "messages": [{"role": "user", "content": [{"type": "text", "text": prompt}]}],
-        "semantic_model_file": f"@{db}.MATCH.MODEL/semantic_model.yaml",
+        "semantic_model_file": f"@{db}.MATCH.MODEL/matches_semantic_model.yml",
     }
     resp = _snowflake.send_snow_api_request(
         "POST",  # method
