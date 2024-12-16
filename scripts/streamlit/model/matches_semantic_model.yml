@@ -10,7 +10,7 @@ tables:
       These tables are being used as reference for the performance of identical products
       across retailers.'
     base_table:
-      database: VP_PROD_ENTITYRESOLUTIONFROMTEXT_PROD
+      database: PRODUCT_MATCHING_DB
       schema: MATCH
       table: APPROVED_MATCHES
     dimensions:
