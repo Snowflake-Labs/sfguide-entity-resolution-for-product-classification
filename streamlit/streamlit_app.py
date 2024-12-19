@@ -10,9 +10,7 @@ import _snowflake
 
 st.set_page_config(layout="wide", initial_sidebar_state="expanded")
 
-
 session = get_active_session()
-db = session.get_current_database()
 
 ######################################
 ##### UPDATE VARIABLES IF NEEDED #####
@@ -110,8 +108,8 @@ def create_prompt_summarize_cortex_analyst_results(question, df, sql):
 
           Whenever possible arrange your response as bullet points.
           
-           Do not mention the CONTEXT in your answer.
-           All purchases and views should be rounded to the nearest number.
+           Do not mention the CONTEXT in your answer
+
            <df>
            {df}
            </df>
@@ -146,7 +144,7 @@ def send_message(session, prompt):
     """Calls the Cortex REST API and returns the response."""
     request_body = {
         "messages": [{"role": "user", "content": [{"type": "text", "text": prompt}]}],
-        "semantic_model_file": f"@{db}.MATCH.MODEL/semantic_model.yaml",
+        "semantic_model_file": f"@PRODUCT_MATCHING_DB.MATCH.MODEL/matches_semantic_model.yml",
     }
     resp = _snowflake.send_snow_api_request(
         "POST",  # method
@@ -189,7 +187,7 @@ def process_message(session, prompt, show_sql, question_summary=None):
     with st.chat_message("user"):
         st.markdown(prompt)
     with st.chat_message("assistant"):
-        with st.spinner("Cortex Analyst is thinking..."):
+        with st.spinner("Cortex Analyst thinking..."):
             response = send_message(session=session, prompt=prompt)
             request_id = response[0]["request_id"]
             content = response[0]["message"]["content"]
@@ -219,7 +217,7 @@ def display_content(
             question = item["text"]
             response_text = item["text"]
         elif item["type"] == "suggestions":
-            st.write("This question is not clear. Please try one of the following questions:")
+            st.write("This question is not valid. Please try one of the following questions:")
             response_text = ""
             with st.expander("Suggestions", expanded=True):
                 for suggestion_index, suggestion in enumerate(item["suggestions"]):
@@ -238,13 +236,29 @@ def display_content(
             with st.expander("Results", expanded=False):
                 with st.spinner("Running SQL..."):
                     df = pd.read_sql(item["statement"], session.connection)
-                    st.dataframe(df)
+                    if len(df.index) > 1:
+                        data_tab, line_tab, bar_tab = st.tabs(
+                            ["Data", "Line Chart", "Bar Chart"]
+                        )
+                        data_tab.dataframe(df)
+                        if len(df.columns) > 1:
+                            df = df.set_index(df.columns[0])
+                        with line_tab:
+                            st.line_chart(df)
+                        with bar_tab:
+                            st.bar_chart(df)
+                    else:
+                        st.dataframe(df)
             
     return response_text
 
 def main():
+    # with st.sidebar:
+    #     st.title("Product Matching")
+    #     st.button("Merchandising Analyst", key="analyst", help="A chatbot to provide insights in natural language.")
     col1, col2 = st.columns([14,2])
-    with col1: st.title("Retail Merchandising Analyst :robot_face:")
+    col1.markdown(f"## Retail Merchandising Analyst :robot_face:")
+
     col2.button('Clear History', key='clear_conversation')
     
     # Set configs
@@ -260,13 +274,6 @@ def main():
         ]
         st.session_state.suggestions = []
         st.session_state.active_suggestion = None
-    st.caption(
-    """Welcome! This application assists in gaining insights and analytics from product matches across 
-    multiple retailers by leveraging fuzzy matching and entity resolution techniques.
-    Ask about product and retailer performances using descriptions, brands and categories
-    and get answers based on aggregated product data!
-    """
-)
 
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
